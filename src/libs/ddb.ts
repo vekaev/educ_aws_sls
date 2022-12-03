@@ -13,9 +13,9 @@ import {
 } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 
-const ddbClient = new DynamoDBClient({});
+const ddbClient = new DynamoDBClient({ region: process.env.AWS_REGION });
 
-export const ddb = <T = Record<string, unknown>>(TableName: string, itemName = 'Item') => ({
+export const ddb = <T = object>(TableName: string, itemName = 'Item') => ({
     getAll: async (params: Partial<ScanInput> = {}): Promise<T[]> => {
         const { Items = [] } = await ddbClient.send(
             new ScanCommand({
@@ -47,7 +47,7 @@ export const ddb = <T = Record<string, unknown>>(TableName: string, itemName = '
                 Item: marshall(data),
             })
         ),
-    update: async (id: string, data: Record<string, unknown>): Promise<T> => {
+    update: async (id: string, data: object): Promise<T> => {
         const objKeys = Object.keys(data);
 
         const { Attributes } = await ddbClient
@@ -70,19 +70,17 @@ export const ddb = <T = Record<string, unknown>>(TableName: string, itemName = '
                     ),
                 })
             )
-            .catch((e) => {
-                console.error(e);
+            .catch(() => {
                 throw new createError.NotFound(`${itemName} with id ${id} not found!`);
             });
 
         return unmarshall(Attributes!) as T;
     },
     delete: async (id: string): Promise<DeleteItemCommandOutput> =>
-        await ddbClient
-            .send(
-                new DeleteItemCommand({
-                    TableName,
-                    Key: marshall({ id }),
-                })
-            )
+        await ddbClient.send(
+            new DeleteItemCommand({
+                TableName,
+                Key: marshall({ id }),
+            })
+        ),
 });

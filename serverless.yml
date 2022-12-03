@@ -15,40 +15,41 @@ provider:
       statements:
         - ${file(serverless/iam/AuctionsTableIAM.yml):AuctionsTableIAM}
   environment:
+    AWS_REGION: ${self:provider.region}
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
-    NODE_OPTIONS: '--enable-source-maps --stack-trace-limit=1000'
     AUCTIONS_TABLE_NAME: ${self:custom.AuctionsTable.name}
+    NODE_OPTIONS: '--enable-source-maps --stack-trace-limit=1000'
 
 package:
-  individually: true
+  individually: false
 
 functions:
   getAuctions:
-    handler: src/functions/auctions.getAuctions
+    handler: src/functions.getAuctions
     events:
       - http:
           method: GET
           path: /auctions
   getAuction:
-    handler: src/functions/auctions.getAuction
+    handler: src/functions.getAuction
     events:
       - http:
           method: GET
           path: /auctions/{id}
   createAuction:
-    handler: src/functions/auctions.createAuction
+    handler: src/functions.createAuction
     events:
       - http:
           method: POST
           path: /auctions
   updateAuction:
-    handler: src/functions/auctions.updateAuction
+    handler: src/functions.updateAuction
     events:
       - http:
           method: PATCH
           path: /auctions/{id}
   deleteAuction:
-    handler: src/functions/auctions.deleteAuction
+    handler: src/functions.deleteAuction
     events:
       - http:
           method: DELETE
@@ -74,8 +75,9 @@ custom:
     number: 1
 
 plugins:
-  - serverless-analyze-bundle-plugin
 #   - serverless-auto-swagger
+# NOTE: use serverless-analyze-bundle-plugin with package.individually = true
+#   - serverless-analyze-bundle-plugin
   - serverless-esbuild
   - serverless-offline
   - serverless-prune-plugin

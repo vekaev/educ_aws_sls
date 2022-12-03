@@ -12,6 +12,7 @@
     "prettier"
   ],
   "rules": {
+    "@typescript-eslint/no-non-null-assertion": 0,
     "no-console": 1,       // Means warning
     "prettier/prettier": 2 // Means error
   }
