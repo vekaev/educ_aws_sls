@@ -2,7 +2,7 @@ import { validate } from 'uuid';
 import createError from 'http-errors';
 import validator from '@middy/validator';
 import middy, { MiddyfiedHandler } from '@middy/core';
-import httpCors, { Options } from '@middy/http-cors';
+import httpCors from '@middy/http-cors';
 import httpErrorHandler from '@middy/http-error-handler';
 import httpJsonBodyParser from '@middy/http-json-body-parser';
 import httpEventNormalizer from '@middy/http-event-normalizer';
@@ -12,6 +12,7 @@ import type { APIGatewayProxyEvent, APIGatewayProxyResult, Handler } from 'aws-l
 
 type MiddlewareObj = middy.MiddlewareObj<APIGatewayProxyEvent, APIGatewayProxyResult>
 type MiddlewareFn = middy.MiddlewareFn<APIGatewayProxyEvent, APIGatewayProxyResult>
+type ValidatorMiddlewareOptions =  { eventSchema: object, contextSchema: object, responseSchema: object }
 
 export const verifyParamIdMiddleware = (): MiddlewareObj  => {
         const before: MiddlewareFn = (request): void => {
@@ -25,7 +26,7 @@ export const verifyParamIdMiddleware = (): MiddlewareObj  => {
         return { before };
 };
 
-export const validatorMiddleware = (eventSchema: object, options: Options = {}) => validator({ eventSchema, ...options })
+export const validatorMiddleware = (eventSchema: ValidatorMiddlewareOptions['eventSchema'], options: Partial<ValidatorMiddlewareOptions> = {}) => validator({ eventSchema, ...options });
 
 export const middify = (handler: Handler): MiddyfiedHandler =>
     middy(handler)
