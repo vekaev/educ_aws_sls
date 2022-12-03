@@ -16,6 +16,7 @@ provider:
         - ${file(serverless/iam/AuctionsTableIAM.yml):AuctionsTableIAM}
   environment:
     AWS_REGION: ${self:provider.region}
+    AWS_PROFILE: ${self:provider.profile}
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
     AUCTIONS_TABLE_NAME: ${self:custom.AuctionsTable.name}
     NODE_OPTIONS: '--enable-source-maps --stack-trace-limit=1000'
@@ -60,6 +61,8 @@ resources:
     AuctionsTable: ${file(serverless/resources/AuctionsTable.yml):AuctionsTable}
 
 custom:
+  serverless-offline:
+    useChildProcesses: true
   AuctionsTable:
     name: !Ref AuctionsTable
     arn:  !GetAtt AuctionsTable.Arn
@@ -80,4 +83,5 @@ plugins:
 #   - serverless-analyze-bundle-plugin
   - serverless-esbuild
   - serverless-offline
+  - serverless-cloudside-plugin
   - serverless-prune-plugin

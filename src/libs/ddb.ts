@@ -1,19 +1,26 @@
 import _get from 'lodash/get';
 import createError from 'http-errors';
 import {
-    DeleteItemCommand,
-    DeleteItemCommandOutput,
+    ScanInput,
+    ScanCommand,
     DynamoDBClient,
     GetItemCommand,
     PutItemCommand,
-    PutItemCommandOutput,
-    ScanCommand,
     UpdateItemCommand,
-    ScanInput,
+    DeleteItemCommand,
+    PutItemCommandOutput,
+    DeleteItemCommandOutput,
 } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
+import { fromIni } from '@aws-sdk/credential-providers';
 
-const ddbClient = new DynamoDBClient({ region: process.env.AWS_REGION });
+const ddbConfig = {
+    region: process.env.AWS_REGION,
+    credentials: fromIni({
+        profile: process.env.AWS_PROFILE,
+    }),
+};
+const ddbClient = new DynamoDBClient(ddbConfig);
 
 export const ddb = <T = object>(TableName: string, itemName = 'Item') => ({
     getAll: async (params: Partial<ScanInput> = {}): Promise<T[]> => {
@@ -40,8 +47,8 @@ export const ddb = <T = object>(TableName: string, itemName = 'Item') => ({
 
         return unmarshall(Item) as T;
     },
-    create: async (data: Partial<T>): Promise<PutItemCommandOutput> =>
-        await ddbClient.send(
+    create: (data: Partial<T>): Promise<PutItemCommandOutput> =>
+        ddbClient.send(
             new PutItemCommand({
                 TableName,
                 Item: marshall(data),
@@ -49,7 +56,6 @@ export const ddb = <T = object>(TableName: string, itemName = 'Item') => ({
         ),
     update: async (id: string, data: object): Promise<T> => {
         const objKeys = Object.keys(data);
-
         const { Attributes } = await ddbClient
             .send(
                 new UpdateItemCommand({
@@ -76,8 +82,8 @@ export const ddb = <T = object>(TableName: string, itemName = 'Item') => ({
 
         return unmarshall(Attributes!) as T;
     },
-    delete: async (id: string): Promise<DeleteItemCommandOutput> =>
-        await ddbClient.send(
+    delete: (id: string): Promise<DeleteItemCommandOutput> =>
+        ddbClient.send(
             new DeleteItemCommand({
                 TableName,
                 Key: marshall({ id }),

@@ -1,3 +1,1 @@
-# Deploy
-
-```serverless deploy --verbose --aws-profile vekaevdev```
+# Serverless project example
