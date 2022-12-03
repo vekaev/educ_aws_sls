@@ -1,0 +1,81 @@
+service: auction-service
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  memorySize: 128
+  timeout: 10
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'eu-west-1'}
+  profile: ${opt:profile, 'vekaevdev'}
+  iam:
+    role:
+      statements:
+        - ${file(serverless/iam/AuctionsTableIAM.yml):AuctionsTableIAM}
+  environment:
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
+    NODE_OPTIONS: '--enable-source-maps --stack-trace-limit=1000'
+    AUCTIONS_TABLE_NAME: ${self:custom.AuctionsTable.name}
+
+package:
+  individually: true
+
+functions:
+  getAuctions:
+    handler: src/functions/auctions.getAuctions
+    events:
+      - http:
+          method: GET
+          path: /auctions
+  getAuction:
+    handler: src/functions/auctions.getAuction
+    events:
+      - http:
+          method: GET
+          path: /auctions/{id}
+  createAuction:
+    handler: src/functions/auctions.createAuction
+    events:
+      - http:
+          method: POST
+          path: /auctions
+  updateAuction:
+    handler: src/functions/auctions.updateAuction
+    events:
+      - http:
+          method: PATCH
+          path: /auctions/{id}
+  deleteAuction:
+    handler: src/functions/auctions.deleteAuction
+    events:
+      - http:
+          method: DELETE
+          path: /auctions/{id}
+
+resources:
+  Resources:
+    AuctionsTable: ${file(serverless/resources/AuctionsTable.yml):AuctionsTable}
+
+custom:
+  AuctionsTable:
+    name: !Ref AuctionsTable
+    arn:  !GetAtt AuctionsTable.Arn
+  esbuild:
+    packager: yarn
+    minify: true
+    keepNames: true
+    exclude: ['aws-sdk', '@aws-sdk/client-dynamodb', '@aws-sdk/util-dynamodb']
+    watch:
+      pattern: ['src/**/*.ts']
+  prune:
+    automatic: true
+    number: 1
+
+plugins:
+  - serverless-analyze-bundle-plugin
+#   - serverless-auto-swagger
+  - serverless-esbuild
+  - serverless-offline
+  - serverless-prune-plugin
