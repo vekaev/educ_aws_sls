@@ -10,13 +10,15 @@ provider:
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'eu-west-1'}
   profile: ${opt:profile, 'vekaevdev'}
+  apiGateway:
+    minimumCompressionSize: 1024
   iam:
     role:
       statements:
         - ${file(serverless/iam/AuctionsTableIAM.yml):AuctionsTableIAM}
   environment:
-    AWS_REGION: ${self:provider.region}
-    AWS_PROFILE: ${self:provider.profile}
+    AWS_DB_REGION: ${self:provider.region}
+    AWS_DB_PROFILE: ${self:provider.profile}
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
     AUCTIONS_TABLE_NAME: ${self:custom.AuctionsTable.name}
     NODE_OPTIONS: '--enable-source-maps --stack-trace-limit=1000'
@@ -62,6 +64,7 @@ resources:
 
 custom:
   serverless-offline:
+    cache: true
     useChildProcesses: true
   AuctionsTable:
     name: !Ref AuctionsTable
@@ -70,7 +73,7 @@ custom:
     packager: yarn
     minify: true
     keepNames: true
-    exclude: ['aws-sdk', '@aws-sdk/client-dynamodb', '@aws-sdk/util-dynamodb']
+    exclude: ['aws-sdk', '@aws-sdk/client-dynamodb', '@aws-sdk/util-dynamodb', '@aws-sdk/credential-providers']
     watch:
       pattern: ['src/**/*.ts']
   prune:
@@ -79,7 +82,8 @@ custom:
 
 plugins:
 #   - serverless-auto-swagger
-# NOTE: use serverless-analyze-bundle-plugin with package.individually = true
+#  NOTE: use serverless-analyze-bundle-plugin with package.individually = true
+#  and run with function name at the end
 #   - serverless-analyze-bundle-plugin
   - serverless-esbuild
   - serverless-offline

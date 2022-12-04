@@ -32,6 +32,7 @@ export const updateAuctionSchema = {
                     },
                 }
             },
+            additionalProperties: false,
         },
     },
     required: ['body'],

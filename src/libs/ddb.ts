@@ -14,12 +14,12 @@ import {
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 import { fromIni } from '@aws-sdk/credential-providers';
 
-const ddbConfig = {
-    region: process.env.AWS_REGION,
+const ddbConfig = process.env.IS_OFFLINE ? {
+    region: process.env.AWS_DB_REGION,
     credentials: fromIni({
-        profile: process.env.AWS_PROFILE,
+        profile: process.env.AWS_DB_PROFILE,
     }),
-};
+} : {};
 const ddbClient = new DynamoDBClient(ddbConfig);
 
 export const ddb = <T = object>(TableName: string, itemName = 'Item') => ({
