@@ -4,7 +4,7 @@
     "description": "Auction Service",
     "license": "MIT",
     "scripts": {
-        "lint": "eslint . --ext .ts",
+        "lint": "eslint .",
         "lint:fix": "eslint . --fix",
         "start": "sls offline cloudside --stage dev --aws-profile vekaevdev",
         "deploy": "sls deploy --verbose --aws-profile vekaevdev",
@@ -65,8 +65,8 @@
         "yarn": ">=1.22.0"
     },
     "lint-staged": {
-        "*.{ts,tsx,js,jsx}": [
-            "yarn run lint:fix"
+        "*.{ts,js}": [
+            "yarn lint"
         ],
         "*.{md,json}": [
             "prettier --write"
