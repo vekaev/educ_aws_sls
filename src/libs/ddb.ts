@@ -24,7 +24,7 @@ const ddbConfig = process.env.IS_OFFLINE
           }),
       }
     : {};
-const ddbClient = new DynamoDBClient(ddbConfig);
+const ddbClient = new DynamoDBClient(ddbConfig)
 
 export const ddb = <T = object>(TableName: string, itemName = 'Item') => ({
     getAll: async (params: Partial<ScanInput> = {}): Promise<T[]> => {
