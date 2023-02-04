@@ -66,7 +66,7 @@
     },
     "lint-staged": {
         "*.{ts,tsx,js,jsx}": [
-            "yarn run eslint --fix"
+            "yarn run lint:fix"
         ],
         "*.{md,json}": [
             "prettier --write"
