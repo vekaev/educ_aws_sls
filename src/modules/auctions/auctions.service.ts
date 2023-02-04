@@ -35,15 +35,6 @@ export const AuctionsService = {
     updateAuction: async (id: string, updateAuctionDto: Partial<Auction>) => {
         const updatedAt = new Date().toISOString();
 
-        if (updateAuctionDto.highestBid?.amount) {
-            const auction = await AuctionsService.getAuction(id);
-
-            if (auction.highestBid.amount >= updateAuctionDto.highestBid.amount)
-                throw new createError.Forbidden(
-                    `Your bid must be higher than ${updateAuctionDto.highestBid.amount}!`
-                );
-        }
-
         return AuctionsRepository.update(id, {
             updatedAt,
             ...updateAuctionDto,
@@ -54,5 +45,49 @@ export const AuctionsService = {
         await AuctionsRepository.delete(id);
 
         return responseFactory({}, StatusCodes.ACCEPTED);
+    },
+
+    closeAuction: async (id: string) => {
+        const auction = await AuctionsService.getAuction(id);
+
+        if (auction.status === StatusEnum.CLOSED)
+            throw new createError.Forbidden('Auction is already closed!');
+
+        return AuctionsService.updateAuction(id, {
+            status: StatusEnum.CLOSED,
+        });
+    },
+
+    processAuctions: async () => {
+        try {
+            const auctionsToClose = await AuctionsRepository.getEndedAuctions();
+            const closePromises = auctionsToClose.map((auction) =>
+                AuctionsService.closeAuction(auction.id),
+            );
+
+            await Promise.all(closePromises);
+
+            return { closed: closePromises.length };
+        } catch (e) {
+            throw new createError.InternalServerError((e as Error).message);
+        }
+    },
+
+    placeBid: async (id: string, bidAmount: number) => {
+        const auction = await AuctionsService.getAuction(id);
+
+        if (auction.status === StatusEnum.CLOSED)
+            throw new createError.Forbidden('Auction is already closed!');
+
+        if (auction.highestBid.amount >= bidAmount)
+            throw new createError.Forbidden(
+                `Your bid must be higher than ${auction.highestBid.amount}!`,
+            );
+
+        return AuctionsService.updateAuction(id, {
+            highestBid: {
+                amount: bidAmount,
+            },
+        });
     },
 };

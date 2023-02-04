@@ -5,7 +5,8 @@ frameworkVersion: '3'
 provider:
   name: aws
   runtime: nodejs18.x
-  memorySize: 128
+  architecture: arm64
+  memorySize: 256
   timeout: 10
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'eu-west-1'}
@@ -24,7 +25,7 @@ provider:
     NODE_OPTIONS: '--enable-source-maps --stack-trace-limit=1000'
 
 package:
-  individually: true
+  individually: false
   patterns:
     - '!test/**'
     - '!.git/**'
@@ -76,6 +77,18 @@ functions:
       - http:
           method: DELETE
           path: /auctions/{id}
+  placeBid:
+    handler: src/functions/auctions.placeBid
+    events:
+      - http:
+          method: POST
+          path: /auctions/{id}/bid
+  processAuctions:
+    handler: src/functions/auctions.processAuctions
+    events:
+      - http:
+          method: POST
+          path: /auctions/process
 
 resources:
   Resources:
@@ -108,3 +121,4 @@ custom:
     number: 1
   autoswagger:
     basePath: /${self:provider.stage}
+    typefiles: []

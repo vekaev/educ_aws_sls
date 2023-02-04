@@ -9,4 +9,5 @@ AuctionsTableIAM:
     - dynamodb:DeleteItem
   Resource:
     - ${self:custom.AuctionsTable.arn}
+    - !Join ['/', ['${self:custom.AuctionsTable.arn}', 'index', '*']]
 #    - arn:aws:dynamodb:${self:provider.region}:${aws:accountId}:table/${self:custom.AuctionsTable.name}

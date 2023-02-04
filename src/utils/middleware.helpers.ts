@@ -25,24 +25,6 @@ type MiddlewareFn = middy.MiddlewareFn<
     APIGatewayProxyResult
 >;
 
-export const verifyParamIdMiddleware = (): MiddlewareObj => {
-    const before: MiddlewareFn = (request): void => {
-        const { id } = request?.event?.pathParameters || {};
-
-        if (!id || !validate(id))
-            throw new createError.BadRequest(
-                'Please pass a valid id (uuid(v4))'
-            );
-    };
-
-    return { before };
-};
-
-export const validatorMiddleware = (
-    eventSchema: object,
-    options: ValidatorOptions = {}
-) => validator({ eventSchema: transpileSchema(eventSchema), ...options });
-
 export const middify = (handler: Handler): MiddyfiedHandler =>
     middy(handler)
         .use(httpJsonBodyParser())
@@ -59,7 +41,25 @@ export const middify = (handler: Handler): MiddyfiedHandler =>
                         },
                     },
                 ],
-            })
+            }),
         )
         .use(httpCors())
         .use(httpErrorHandler());
+
+export const verifyParamIdMiddleware = (): MiddlewareObj => {
+    const before: MiddlewareFn = (request): void => {
+        const { id } = request?.event?.pathParameters || {};
+
+        if (!id || !validate(id))
+            throw new createError.BadRequest(
+                'Please pass a valid id (uuid(v4))',
+            );
+    };
+
+    return { before };
+};
+
+export const validatorMiddleware = (
+    eventSchema: object,
+    options: ValidatorOptions = {},
+) => validator({ eventSchema: transpileSchema(eventSchema), ...options });

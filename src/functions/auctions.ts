@@ -6,4 +6,5 @@ export const {
     createAuction,
     updateAuction,
     deleteAuction,
+    processAuctions,
 } = AuctionsController;

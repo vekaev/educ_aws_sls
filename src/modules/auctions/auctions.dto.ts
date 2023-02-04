@@ -1,6 +1,6 @@
 import { StatusEnum } from './auctions.types';
 
-export const createAuctionSchema = {
+export const createAuctionDto = {
     type: 'object',
     properties: {
         body: {
@@ -14,7 +14,7 @@ export const createAuctionSchema = {
     required: ['body'],
 };
 
-export const updateAuctionSchema = {
+export const updateAuctionDto = {
     type: 'object',
     properties: {
         body: {
@@ -37,4 +37,17 @@ export const updateAuctionSchema = {
         },
     },
     required: ['body'],
+};
+
+export const placeBidDto = {
+    type: 'object',
+    properties: {
+        body: {
+            type: 'object',
+            properties: {
+                amount: { type: 'number' },
+            },
+            required: ['amount'],
+        },
+    },
 };

@@ -1,4 +1,5 @@
 export const StatusEnum = {
+    CLOSED: 0,
     OPEN: 1,
 } as const;
 
