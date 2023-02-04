@@ -20,7 +20,7 @@ const ddbConfig = process.env.IS_OFFLINE
     ? {
           region: process.env.AWS_DB_REGION,
           credentials: fromIni({
-              profile: process.env.AWS_DB_PROFILE
+              profile: process.env.AWS_DB_PROFILE,
           }),
       }
     : {};
@@ -28,7 +28,7 @@ const ddbClient = new DynamoDBClient(ddbConfig);
 
 export const ddb = <T = object>(TableName: string, itemName = 'Item') => ({
     getAll: async (params: Partial<ScanInput> = {}): Promise<T[]> => {
-        const { Items = [] } = await ddbClient.send(
+        const { Items = [] } = await  ddbClient.send(
             new ScanCommand({
                 TableName,
                 ...params,
