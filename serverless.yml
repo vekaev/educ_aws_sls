@@ -45,7 +45,6 @@ package:
     - '!yarn.lock'
     - '!README.md'
 
-
 functions:
   getAuctions:
     handler: src/functions/auctions.getAuctions

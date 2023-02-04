@@ -12,7 +12,6 @@ jobs:
         with:
           node-version: 18
           cache: 'yarn'
-#           cache-dependency-path: auction-service/yarn.lock
       - name: Install dependencies
         if: steps.cache.outputs.cache-hit != 'true'
         run: yarn install --frozen-lockfile --ignore-scripts
