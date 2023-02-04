@@ -6,6 +6,19 @@ AuctionsTable:
     AttributeDefinitions:
       - AttributeName: id
         AttributeType: S # string
+      - AttributeName: status
+        AttributeType: N
+      - AttributeName: endingAt
+        AttributeType: S
     KeySchema:
       - AttributeName: id
         KeyType: HASH # partition key to be unique
+    GlobalSecondaryIndexes:
+      - IndexName: statusAndEndDate
+        KeySchema:
+          - AttributeName: status
+            KeyType: HASH
+          - AttributeName: endingAt
+            KeyType: RANGE
+        Projection:
+          ProjectionType: ALL

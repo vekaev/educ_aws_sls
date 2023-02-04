@@ -30,7 +30,8 @@ export const updateAuctionSchema = {
                     properties: {
                         amount: { type: 'number' },
                     },
-                }
+                    additionalProperties: false,
+                },
             },
             additionalProperties: false,
         },

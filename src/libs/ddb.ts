@@ -14,12 +14,14 @@ import {
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 import { fromIni } from '@aws-sdk/credential-providers';
 
-const ddbConfig = process.env.IS_OFFLINE ? {
-    region: process.env.AWS_DB_REGION,
-    credentials: fromIni({
-        profile: process.env.AWS_DB_PROFILE,
-    }),
-} : {};
+const ddbConfig = process.env.IS_OFFLINE
+    ? {
+          region: process.env.AWS_DB_REGION,
+          credentials: fromIni({
+              profile: process.env.AWS_DB_PROFILE,
+          }),
+      }
+    : {};
 const ddbClient = new DynamoDBClient(ddbConfig);
 
 export const ddb = <T = object>(TableName: string, itemName = 'Item') => ({
@@ -42,7 +44,9 @@ export const ddb = <T = object>(TableName: string, itemName = 'Item') => ({
         );
 
         if (Item == null) {
-            throw new createError.NotFound(`${itemName} with id ${id} not found!`);
+            throw new createError.NotFound(
+                `${itemName} with id ${id} not found!`
+            );
         }
 
         return unmarshall(Item) as T;
@@ -63,21 +67,31 @@ export const ddb = <T = object>(TableName: string, itemName = 'Item') => ({
                     Key: marshall({ id }),
                     ReturnValues: 'ALL_NEW',
                     ConditionExpression: 'attribute_exists(id)',
-                    UpdateExpression: `SET ${objKeys.map((_, index) => `#field${index} = :value${index}`).join(', ')}`,
+                    UpdateExpression: `SET ${objKeys
+                        .map((_, index) => `#field${index} = :value${index}`)
+                        .join(', ')}`,
                     ExpressionAttributeNames: objKeys.reduce(
-                        (accumulator, key, index) => ({ ...accumulator, [`#field${index}`]: key }),
+                        (accumulator, key, index) => ({
+                            ...accumulator,
+                            [`#field${index}`]: key,
+                        }),
                         {}
                     ),
                     ExpressionAttributeValues: marshall(
                         objKeys.reduce(
-                            (accumulator, key, index) => ({ ...accumulator, [`:value${index}`]: _get(data, key) }),
+                            (accumulator, key, index) => ({
+                                ...accumulator,
+                                [`:value${index}`]: _get(data, key),
+                            }),
                             {}
                         )
                     ),
                 })
             )
             .catch(() => {
-                throw new createError.NotFound(`${itemName} with id ${id} not found!`);
+                throw new createError.NotFound(
+                    `${itemName} with id ${id} not found!`
+                );
             });
 
         return unmarshall(Attributes!) as T;

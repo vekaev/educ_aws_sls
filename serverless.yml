@@ -24,35 +24,54 @@ provider:
     NODE_OPTIONS: '--enable-source-maps --stack-trace-limit=1000'
 
 package:
-  individually: false
+  individually: true
+  patterns:
+    - '!test/**'
+    - '!.git/**'
+    - '!.idea/**'
+    - '!.jest/**'
+    - '!.husky/**'
+    - '!.github/**'
+    - '!.serverless/**'
+    - '!node_modules/.cache/**'
+    - '!.coverage'
+    - '!.eslintrc'
+    - '!.prettierrc'
+    - '!.gitignore'
+    - '!.gitattributes'
+    - '!.nvmrc'
+    - '!.npmrc'
+    - '!yarn.lock'
+    - '!README.md'
+
 
 functions:
   getAuctions:
-    handler: src/functions.getAuctions
+    handler: src/functions/auctions.getAuctions
     events:
       - http:
           method: GET
           path: /auctions
   getAuction:
-    handler: src/functions.getAuction
+    handler: src/functions/auctions.getAuction
     events:
       - http:
           method: GET
           path: /auctions/{id}
   createAuction:
-    handler: src/functions.createAuction
+    handler: src/functions/auctions.createAuction
     events:
       - http:
           method: POST
           path: /auctions
   updateAuction:
-    handler: src/functions.updateAuction
+    handler: src/functions/auctions.updateAuction
     events:
       - http:
           method: PATCH
           path: /auctions/{id}
   deleteAuction:
-    handler: src/functions.deleteAuction
+    handler: src/functions/auctions.deleteAuction
     events:
       - http:
           method: DELETE
@@ -62,10 +81,17 @@ resources:
   Resources:
     AuctionsTable: ${file(serverless/resources/AuctionsTable.yml):AuctionsTable}
 
+plugins:
+  - serverless-auto-swagger
+#  NOTE: use serverless-analyze-bundle-plugin with package.individually = true
+#  and run with function name at the end
+  - serverless-analyze-bundle-plugin
+  - serverless-esbuild
+  - serverless-offline
+  - serverless-cloudside-plugin
+  - serverless-prune-plugin
+
 custom:
-  serverless-offline:
-    cache: true
-    useChildProcesses: true
   AuctionsTable:
     name: !Ref AuctionsTable
     arn:  !GetAtt AuctionsTable.Arn
@@ -74,18 +100,11 @@ custom:
     minify: true
     keepNames: true
     exclude: ['aws-sdk', '@aws-sdk/client-dynamodb', '@aws-sdk/util-dynamodb', '@aws-sdk/credential-providers']
+    installExtraArgs: ['--max-old-space-size=4096']
     watch:
       pattern: ['src/**/*.ts']
   prune:
     automatic: true
     number: 1
-
-plugins:
-#   - serverless-auto-swagger
-#  NOTE: use serverless-analyze-bundle-plugin with package.individually = true
-#  and run with function name at the end
-#   - serverless-analyze-bundle-plugin
-  - serverless-esbuild
-  - serverless-offline
-  - serverless-cloudside-plugin
-  - serverless-prune-plugin
+  autoswagger:
+    basePath: /${self:provider.stage}
