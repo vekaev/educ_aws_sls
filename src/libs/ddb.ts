@@ -13,8 +13,8 @@ import {
     PutItemCommandOutput,
     DeleteItemCommandOutput,
 } from '@aws-sdk/client-dynamodb';
-import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 import { fromIni } from '@aws-sdk/credential-providers';
+import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 
 const ddbConfig = process.env.IS_OFFLINE
     ? {
@@ -27,7 +27,7 @@ const ddbConfig = process.env.IS_OFFLINE
 const ddbClient = new DynamoDBClient(ddbConfig);
 
 export const ddb = <T = object>(TableName: string, itemName = 'Item') => ({
-    getAll: async (params: Partial<ScanInput> = {}): Promise<T[]> => {
+    getAll: async (params: Omit<ScanInput, 'TableName'> = {}): Promise<T[]> => {
         const { Items = [] } = await ddbClient.send(
             new ScanCommand({
                 TableName,
@@ -97,7 +97,7 @@ export const ddb = <T = object>(TableName: string, itemName = 'Item') => ({
                         objKeys.reduce(
                             (accumulator, key, index) => ({
                                 ...accumulator,
-                                [`:value${index}`]: _get(data, key),
+                                [`:value${index}`]: _get(data, key), // eslint-disable-line @typescript-eslint/no-unsafe-assignment
                             }),
                             {},
                         ),

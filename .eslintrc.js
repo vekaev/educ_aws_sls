@@ -6,23 +6,25 @@ const prettierOptions = JSON.parse(
 );
 
 module.exports = {
-    root: true,
+    extends: [
+        'prettier',
+        'eslint:recommended',
+        'plugin:@typescript-eslint/recommended',
+        'plugin:@typescript-eslint/recommended-requiring-type-checking',
+    ],
     parser: '@typescript-eslint/parser',
     plugins: ['@typescript-eslint', 'prettier'],
+    root: true,
     parserOptions: {
-        project: 'tsconfig.json',
+        project: ['./tsconfig.json'],
         tsconfigRootDir : __dirname,
+        include: ['src/**/*'],
         sourceType: 'module',
     },
     env: {
+        es6: true,
         node: true,
     },
-    extends: [
-        'eslint:recommended',
-        'plugin:@typescript-eslint/eslint-recommended',
-        'plugin:@typescript-eslint/recommended',
-        'prettier',
-    ],
     overrides: [
         {
             files: ['**/*.ts'],

@@ -1,15 +1,21 @@
 import { v4 as uuid } from 'uuid';
-import addHours from 'date-fns/addHours';
 import createError from 'http-errors';
+import addHours from 'date-fns/addHours';
 import { StatusCodes } from 'http-status-codes';
 
-import { responseFactory } from '@/utils';
-
+import { GetAuctionsQueryDto } from './auctions.dto';
 import { Auction, StatusEnum } from './auctions.types';
 import { AuctionsRepository } from './auctions.repository';
 
+import { responseFactory } from '@/utils/common.helpers';
+
 export const AuctionsService = {
-    getAuctions: AuctionsRepository.getAll,
+    getAuctions: (query: GetAuctionsQueryDto = {}) => {
+        if (query.status)
+            return AuctionsRepository.getAuctionsByStatus(query.status);
+
+        return AuctionsRepository.getAll();
+    },
 
     getAuction: (id: string) => AuctionsRepository.getById(id),
 
@@ -26,7 +32,7 @@ export const AuctionsService = {
             createdAt,
             updatedAt: createdAt,
         };
-
+        console.log(1);
         await AuctionsRepository.create(auction);
 
         return responseFactory(auction, StatusCodes.CREATED);
