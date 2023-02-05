@@ -32,7 +32,7 @@ export const AuctionsService = {
             createdAt,
             updatedAt: createdAt,
         };
-        console.log(1);
+
         await AuctionsRepository.create(auction);
 
         return responseFactory(auction, StatusCodes.CREATED);

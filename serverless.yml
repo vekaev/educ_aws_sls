@@ -19,13 +19,14 @@ provider:
   iam:
     role:
       statements:
+        - ${file(serverless/iam/RolesIAM.yml):RolesIAM}
         - ${file(serverless/iam/AuctionsTableIAM.yml):AuctionsTableIAM}
   environment:
     AWS_DB_REGION: ${self:provider.region}
     AWS_DB_PROFILE: ${self:provider.profile}
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
     AUCTIONS_TABLE_NAME: ${self:custom.AuctionsTable.name}
-    AUTH0_PUBLIC_KEY: ${ssm:/auction-service/${self:provider.stage}/AUTH0_PUBLIC_KEY, file(secret.pem)}
+    AUTH0_PUBLIC_KEY: ${ssm:${self:custom.ssmPath}/AUTH0_PUBLIC_KEY}
 
 package:
   individually: true
@@ -122,13 +123,15 @@ plugins:
   - serverless-prune-plugin
 
 custom:
+  ssmPath: /aws/reference/secretsmanager/${self:service}/${self:provider.stage}
+  AuctionsTable:
+    name: !Ref AuctionsTable
+    arn:  !GetAtt AuctionsTable.Arn
+  # PLUGIN CONFIGS
   serverless-offline:
     httpPort: 3001
     hotReload: true
     noPrependStageInUrl: true
-  AuctionsTable:
-    name: !Ref AuctionsTable
-    arn:  !GetAtt AuctionsTable.Arn
   esbuild:
     packager: yarn
     minify: true

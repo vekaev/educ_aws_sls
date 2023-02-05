@@ -1,0 +1,7 @@
+RolesIAM:
+  Effect: Allow
+  Action:
+    - "secretsmanager:ListSecrets"
+    - "secretmanager:GetSecretValue"
+  Resource:
+    - arn:aws:secretsmanager:${self:provider.region}:${aws:accountId}:secret:${self:service}/${self:provider.stage}/*
