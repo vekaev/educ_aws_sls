@@ -11,6 +11,9 @@ provider:
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'eu-west-1'}
   profile: ${opt:profile, 'vekaevdev'}
+  tracing:
+    lambda: true
+    apiGateway: true
   apiGateway:
     minimumCompressionSize: 1024
   iam:
@@ -22,10 +25,10 @@ provider:
     AWS_DB_PROFILE: ${self:provider.profile}
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
     AUCTIONS_TABLE_NAME: ${self:custom.AuctionsTable.name}
-    NODE_OPTIONS: '--enable-source-maps --stack-trace-limit=1000'
+    AUTH0_PUBLIC_KEY: ${ssm:/auction-service/${self:provider.stage}/AUTH0_PUBLIC_KEY, file(secret.pem)}
 
 package:
-  individually: false
+  individually: true
   patterns:
     - '!test/**'
     - '!.git/**'
@@ -46,57 +49,72 @@ package:
     - '!README.md'
 
 functions:
+  authorizer:
+    handler: src/functions/authorizer.handler
   getAuctions:
-    handler: src/functions/auctions.getAuctions
+    handler: src/functions/auctions/getAuctions.handler
     events:
       - http:
           method: GET
           path: /auctions
+          authorizer: authorizer
   getAuction:
-    handler: src/functions/auctions.getAuction
+    handler: src/functions/auctions/getAuction.handler
     events:
       - http:
           method: GET
           path: /auctions/{id}
+          authorizer: authorizer
   createAuction:
-    handler: src/functions/auctions.createAuction
+    handler: src/functions/auctions/createAuction.handler
     events:
       - http:
           method: POST
           path: /auctions
+          authorizer: authorizer
   updateAuction:
-    handler: src/functions/auctions.updateAuction
+    handler: src/functions/auctions/updateAuction.handler
     events:
       - http:
           method: PATCH
           path: /auctions/{id}
+          authorizer: authorizer
   deleteAuction:
-    handler: src/functions/auctions.deleteAuction
+    handler: src/functions/auctions/deleteAuction.handler
     events:
       - http:
           method: DELETE
           path: /auctions/{id}
+          authorizer: authorizer
   placeBid:
-    handler: src/functions/auctions.placeBid
+    handler: src/functions/auctions/placeBid.handler
     events:
       - http:
           method: POST
           path: /auctions/{id}/bid
+          authorizer: authorizer
   processAuctions:
-    handler: src/functions/auctions.processAuctions
+    handler: src/functions/auctions/processAuctions.handler
     events:
       - http:
           method: POST
           path: /auctions/process
+          authorizer: authorizer
 
 resources:
   Resources:
     AuctionsTable: ${file(serverless/resources/AuctionsTable.yml):AuctionsTable}
+    GatewayResponseDefault4XX:
+      Type: AWS::ApiGateway::GatewayResponse
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+        ResponseType: DEFAULT_4XX
+        RestApiId:
+          Ref: ApiGatewayRestApi
 
 plugins:
   - serverless-auto-swagger
-#  NOTE: use serverless-analyze-bundle-plugin with package.individually = true
-#  and run with function name at the end
   - serverless-analyze-bundle-plugin
   - serverless-esbuild
   - serverless-offline
@@ -104,6 +122,10 @@ plugins:
   - serverless-prune-plugin
 
 custom:
+  serverless-offline:
+    httpPort: 3001
+    hotReload: true
+    noPrependStageInUrl: true
   AuctionsTable:
     name: !Ref AuctionsTable
     arn:  !GetAtt AuctionsTable.Arn
@@ -119,5 +141,4 @@ custom:
     automatic: true
     number: 1
   autoswagger:
-    basePath: /${self:provider.stage}
     typefiles: []

@@ -10,7 +10,7 @@
         "deploy": "sls deploy --verbose --aws-profile vekaevdev",
         "// TODO: nodemon should be removed and start command replaced to": "sls offline cloudside --stage dev --reloadHandler --aws-profile vekaevdev",
         "start:debug": "export SLS_DEBUG=* && nodemon -e js,ts,yml -x yarn run start",
-        "analyze:getAuctions": "sls package --analyze getAuctions",
+        "analyze:getAuctions": "sls package --analyze getAuctions --aws-profile vekaevdev",
         "logs:getAuctions": "sls logs -f getAuctions -t --aws-profile vekaevdev",
         "invoke:getAuctions": "sls invoke -f getAuctions -l --aws-profile vekaevdev"
     },
@@ -30,6 +30,8 @@
         "http-errors": "2.0.0",
         "http-status-codes": "2.2.0",
         "joi": "17.7.0",
+        "jsonwebtoken": "9.0.0",
+        "jwks-rsa": "3.0.1",
         "lodash": "4.17.21",
         "uuid": "9.0.0"
     },
@@ -37,7 +39,9 @@
         "@serverless/typescript": "3.27.0",
         "@types/aws-lambda": "8.10.110",
         "@types/http-errors": "2.0.1",
+        "@types/jsonwebtoken": "9.0.1",
         "@types/node": "18.11.18",
+        "@types/serverless": "3.12.9",
         "@types/uuid": "9.0.0",
         "@typescript-eslint/eslint-plugin": "5.50.0",
         "@typescript-eslint/parser": "5.50.0",

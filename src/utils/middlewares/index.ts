@@ -1,29 +1,15 @@
 import { validate } from 'uuid';
+import { Handler } from 'aws-lambda';
 import createError from 'http-errors';
 import httpCors from '@middy/http-cors';
-import validator from '@middy/validator';
 import middy, { MiddyfiedHandler } from '@middy/core';
 import httpErrorHandler from '@middy/http-error-handler';
-import { transpileSchema } from '@middy/validator/transpile';
 import httpJsonBodyParser from '@middy/http-json-body-parser';
 import httpEventNormalizer from '@middy/http-event-normalizer';
 import httpHeaderNormalizer from '@middy/http-header-normalizer';
 import httpResponseSerializer from '@middy/http-response-serializer';
-import type {
-    APIGatewayProxyEvent,
-    APIGatewayProxyResult,
-    Handler,
-} from 'aws-lambda';
 
-type ValidatorOptions = Parameters<typeof validator>[0];
-type MiddlewareObj = middy.MiddlewareObj<
-    APIGatewayProxyEvent,
-    APIGatewayProxyResult
->;
-type MiddlewareFn = middy.MiddlewareFn<
-    APIGatewayProxyEvent,
-    APIGatewayProxyResult
->;
+import { MiddlewareFn, MiddlewareObj } from '@/types';
 
 export const middify = (handler: Handler): MiddyfiedHandler =>
     middy(handler)
@@ -36,7 +22,7 @@ export const middify = (handler: Handler): MiddyfiedHandler =>
                 serializers: [
                     {
                         regex: /^application\/json$/,
-                        serializer: (res) => {
+                        serializer: (res: Response) => {
                             return JSON.stringify(res.body || res);
                         },
                     },
@@ -58,8 +44,3 @@ export const verifyParamIdMiddleware = (): MiddlewareObj => {
 
     return { before };
 };
-
-export const validatorMiddleware = (
-    eventSchema: object,
-    options: ValidatorOptions = {},
-) => validator({ eventSchema: transpileSchema(eventSchema), ...options });
