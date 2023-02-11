@@ -12,7 +12,7 @@ export enum PolicyEffect {
     DENY = 'Deny',
 }
 
-export interface ContextWithUser extends JwtPayload {
+export interface Auth0JwtPayload extends JwtPayload {
     nickname: string;
     name: string;
     picture: string;

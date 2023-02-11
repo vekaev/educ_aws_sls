@@ -9,8 +9,8 @@ import { validatorMiddleware } from '@/utils/middlewares/validator.middleware';
 import { MiddyfiedEvent } from '@/types';
 
 export const handler = middify(
-    (event: MiddyfiedEvent<CreateAuctionBodyDto>, context) => {
-        console.log(context);
+    (event: MiddyfiedEvent<CreateAuctionBodyDto>) => {
+        console.info(event.requestContext.authorizer);
         return AuctionsService.createAuction(event.body.title);
     },
 ).use(validatorMiddleware(createAuctionSchema));

@@ -32,8 +32,10 @@ module.exports = {
         },
     ],
     rules: {
+        '@typescript-eslint/ban-ts-comment': 0,
         '@typescript-eslint/no-non-null-assertion': 0,
-        'no-console': 1, // Means warning
         'prettier/prettier': ['error', prettierOptions],
+        'no-console': ['error', { 'allow': ['warn', 'error', 'info'] }],
     },
+    ignorePatterns: ['swagger', '.eslintrc.js'],
 };

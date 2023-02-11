@@ -19,14 +19,14 @@ provider:
   iam:
     role:
       statements:
-        - ${file(serverless/iam/RolesIAM.yml):RolesIAM}
+        - ${file(serverless/iam/SecretsIAM.yml):SecretsIAM}
         - ${file(serverless/iam/AuctionsTableIAM.yml):AuctionsTableIAM}
   environment:
     AWS_DB_REGION: ${self:provider.region}
     AWS_DB_PROFILE: ${self:provider.profile}
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
     AUCTIONS_TABLE_NAME: ${self:custom.AuctionsTable.name}
-    AUTH0_PUBLIC_KEY: ${ssm:${self:custom.ssmPath}/AUTH0_PUBLIC_KEY}
+    AUTH0_PUBLIC_KEY: ${ssm:${self:custom.ssmBasePath}/AUTH0_PUBLIC_KEY}
 
 package:
   individually: true
@@ -39,15 +39,15 @@ package:
     - '!.github/**'
     - '!.serverless/**'
     - '!node_modules/.cache/**'
-    - '!.coverage'
-    - '!.eslintrc'
-    - '!.prettierrc'
-    - '!.gitignore'
-    - '!.gitattributes'
     - '!.nvmrc'
     - '!.npmrc'
-    - '!yarn.lock'
+    - '!.coverage'
+    - '!.eslintrc'
+    - '!.gitignore'
+    - '!.prettierrc'
+    - '!.gitattributes'
     - '!README.md'
+    - '!pnpm-lock.yaml'
 
 functions:
   authorizer:
@@ -58,7 +58,6 @@ functions:
       - http:
           method: GET
           path: /auctions
-          authorizer: authorizer
   getAuction:
     handler: src/functions/auctions/getAuction.handler
     events:
@@ -115,7 +114,7 @@ resources:
           Ref: ApiGatewayRestApi
 
 plugins:
-  - serverless-auto-swagger
+#   - serverless-auto-swagger
   - serverless-analyze-bundle-plugin
   - serverless-esbuild
   - serverless-offline
@@ -123,17 +122,16 @@ plugins:
   - serverless-prune-plugin
 
 custom:
-  ssmPath: /aws/reference/secretsmanager/${self:service}/${self:provider.stage}
+  ssmBasePath: /aws/reference/secretsmanager/${self:service}/${self:provider.stage}
   AuctionsTable:
     name: !Ref AuctionsTable
     arn:  !GetAtt AuctionsTable.Arn
-  # PLUGIN CONFIGS
+  # PLUGINS CONFIGS
   serverless-offline:
     httpPort: 3001
-    hotReload: true
     noPrependStageInUrl: true
   esbuild:
-    packager: yarn
+    packager: pnpm
     minify: true
     keepNames: true
     exclude: ['aws-sdk', '@aws-sdk/client-dynamodb', '@aws-sdk/util-dynamodb', '@aws-sdk/credential-providers']
