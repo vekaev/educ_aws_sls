@@ -10,7 +10,7 @@
         "preinstall": "npx only-allow yarn",
         "deploy": "sls deploy --verbose --aws-profile vekaevdev",
         "start": "sls offline cloudside --stage dev --aws-profile vekaevdev",
-        "// TODO: nodemon should be removed and start command replaced to": "sls offline cloudside --stage dev --reloadHandler --aws-profile vekaevdev",
+        "// TODO: remove nodemon after merging pr in serverless-cloudside-plugin and start command should be replaced to": "sls offline cloudside --stage dev --reloadHandler --aws-profile vekaevdev",
         "start:debug": "export SLS_DEBUG=* && nodemon -e js,ts,yml -x yarn run start",
         "logs:getAuctions": "sls logs -f getAuctions -t --aws-profile vekaevdev",
         "invoke:getAuctions": "sls invoke -f getAuctions -l --aws-profile vekaevdev",
