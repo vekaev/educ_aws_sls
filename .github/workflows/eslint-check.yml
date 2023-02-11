@@ -10,10 +10,10 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          cache: 'pnpm'
+          cache: 'yarn'
           node-version-file: '.nvmrc'
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --ignore-scripts
+        run: yarn install --frozen-lockfile --ignore-scripts
       - name: Run eslint using reviewdog
         uses: reviewdog/action-eslint@v1
         with:

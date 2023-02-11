@@ -46,8 +46,8 @@ package:
     - '!.gitignore'
     - '!.prettierrc'
     - '!.gitattributes'
+    - '!yarn.lock'
     - '!README.md'
-    - '!pnpm-lock.yaml'
 
 functions:
   authorizer:
@@ -131,7 +131,7 @@ custom:
     httpPort: 3001
     noPrependStageInUrl: true
   esbuild:
-    packager: pnpm
+    packager: yarn
     minify: true
     keepNames: true
     exclude: ['aws-sdk', '@aws-sdk/client-dynamodb', '@aws-sdk/util-dynamodb', '@aws-sdk/credential-providers']

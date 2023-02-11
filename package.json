@@ -9,7 +9,7 @@
         "start": "sls offline cloudside --stage dev --aws-profile vekaevdev",
         "deploy": "sls deploy --verbose --aws-profile vekaevdev",
         "// TODO: nodemon should be removed and start command replaced to": "sls offline cloudside --stage dev --reloadHandler --aws-profile vekaevdev",
-        "start:debug": "export SLS_DEBUG=* && nodemon -e js,ts,yml -x pnpm run start",
+        "start:debug": "export SLS_DEBUG=* && nodemon -e js,ts,yml -x yarn run start",
         "analyze:getAuctions": "sls package --analyze getAuctions --aws-profile vekaevdev",
         "logs:getAuctions": "sls logs -f getAuctions -t --aws-profile vekaevdev",
         "invoke:getAuctions": "sls invoke -f getAuctions -l --aws-profile vekaevdev"
@@ -67,11 +67,11 @@
     },
     "engines": {
         "node": ">=18.0.0",
-        "pnpm": ">=7.27.0"
+        "yarn": ">=1.22.0"
     },
     "lint-staged": {
         "*.{ts,js}": [
-            "pnpm lint:fix"
+            "yarn lint:fix"
         ],
         "*.{md,json}": [
             "prettier --write"
