@@ -25,7 +25,7 @@ export const AuctionsService = {
     createAuction: async (title: string, seller: string) => {
         const now = new Date();
         const createdAt = now.toISOString();
-        const endingAt = addHours(now, 2).toISOString();
+        const endingAt = addHours(now, 1).toISOString();
         const auction: Auction = {
             id: uuid(),
             title,

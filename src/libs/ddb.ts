@@ -15,10 +15,9 @@ import {
 } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 
-import { IS_LOCAL, DEFAULT_AMAZON_CLIENT_CONFIG } from '@/constants';
+import { DEFAULT_AMAZON_CLIENT_CONFIG } from '@/constants';
 
-const ddbConfig = IS_LOCAL ? DEFAULT_AMAZON_CLIENT_CONFIG : {};
-const ddbClient = new DynamoDBClient(ddbConfig);
+const ddbClient = new DynamoDBClient(DEFAULT_AMAZON_CLIENT_CONFIG);
 
 export const ddb = <T = object>(TableName: string, itemName = 'Item') => ({
     getAll: async (params: Omit<ScanInput, 'TableName'> = {}): Promise<T[]> => {

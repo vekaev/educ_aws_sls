@@ -19,10 +19,7 @@ export const NotificationService = {
             return responseFactory(result);
         } catch (error) {
             throw new createError.BadRequest(
-                getErrorMessage(
-                    (error as { Error: Error }).Error,
-                    'Error sending email',
-                ),
+                getErrorMessage(error, 'Error sending email'),
             );
         }
     },
