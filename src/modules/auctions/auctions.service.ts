@@ -19,13 +19,14 @@ export const AuctionsService = {
 
     getAuction: (id: string) => AuctionsRepository.getById(id),
 
-    createAuction: async (title: string) => {
+    createAuction: async (title: string, seller: string) => {
         const now = new Date();
         const createdAt = now.toISOString();
         const endingAt = addHours(now, 1).toISOString();
         const auction: Auction = {
             id: uuid(),
             title,
+            seller,
             status: StatusEnum.OPEN,
             highestBid: { amount: 0 },
             endingAt,
@@ -48,6 +49,7 @@ export const AuctionsService = {
     },
 
     deleteAuction: async (id: string) => {
+        await AuctionsService.getAuction(id);
         await AuctionsRepository.delete(id);
 
         return responseFactory({}, StatusCodes.ACCEPTED);
@@ -79,11 +81,21 @@ export const AuctionsService = {
         }
     },
 
-    placeBid: async (id: string, bidAmount: number) => {
+    placeBid: async (id: string, bidAmount: number, bidder: string) => {
         const auction = await AuctionsService.getAuction(id);
 
         if (auction.status === StatusEnum.CLOSED)
             throw new createError.Forbidden('Auction is already closed!');
+
+        if (auction.seller === bidder)
+            throw new createError.Forbidden(
+                'You cannot bid on your own auctions!',
+            );
+
+        if (auction.highestBid.bidder === bidder)
+            throw new createError.Forbidden(
+                'You are already the highest bidder',
+            );
 
         if (auction.highestBid.amount >= bidAmount)
             throw new createError.Forbidden(
@@ -92,6 +104,7 @@ export const AuctionsService = {
 
         return AuctionsService.updateAuction(id, {
             highestBid: {
+                bidder,
                 amount: bidAmount,
             },
         });

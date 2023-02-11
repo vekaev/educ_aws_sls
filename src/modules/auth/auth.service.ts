@@ -4,15 +4,15 @@
 import jwt_verify from 'jsonwebtoken/verify';
 import type { verify } from 'jsonwebtoken';
 
-import { Auth0JwtPayload } from '@/types';
+import { IUser } from '@/types';
 
 export const AuthService = {
-    verifyToken: async (token: string): Promise<Auth0JwtPayload> => {
+    verifyToken: async (token: string): Promise<IUser> => {
         if (!token) throw new Error('No token provided');
 
         return (jwt_verify as typeof verify)(
             token,
             process.env.AUTH0_PUBLIC_KEY!,
-        ) as Promise<Auth0JwtPayload>;
+        ) as Promise<IUser>;
     },
 };

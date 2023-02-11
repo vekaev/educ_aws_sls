@@ -3,14 +3,17 @@ import {
     CreateAuctionBodyDto,
     createAuctionSchema,
 } from '@/modules/auctions';
+
 import { middify } from '@/utils/middlewares';
+import { getUserFrom } from '@/utils/auth.utils';
 import { validatorMiddleware } from '@/utils/middlewares/validator.middleware';
 
 import { MiddyfiedEvent } from '@/types';
 
 export const handler = middify(
     (event: MiddyfiedEvent<CreateAuctionBodyDto>) => {
-        console.info(event.requestContext.authorizer);
-        return AuctionsService.createAuction(event.body.title);
+        const user = getUserFrom(event);
+
+        return AuctionsService.createAuction(event.body.title, user.email);
     },
 ).use(validatorMiddleware(createAuctionSchema));

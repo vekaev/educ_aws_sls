@@ -7,6 +7,7 @@ export type StatusEnum = (typeof StatusEnum)[keyof typeof StatusEnum];
 
 export interface Auction {
     id: string;
+    seller: string;
     title: string;
     status: StatusEnum;
     createdAt: string;
@@ -14,5 +15,6 @@ export interface Auction {
     endingAt: string;
     highestBid: {
         amount: number;
+        bidder?: string;
     };
 }

@@ -22,4 +22,4 @@ jobs:
       - name: Serverless AWS authentication
         run: sls config credentials -p aws --key ${{ secrets.AWS_ACCESS_KEY_ID }} --secret ${{ secrets.AWS_SECRET_ACCESS_KEY }} -n default
       - name: Deploy
-        run: sls deploy --aws-profile default
+        run: sls deploy --aws-profile default --verbose

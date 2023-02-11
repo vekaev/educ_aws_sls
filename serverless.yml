@@ -20,6 +20,7 @@ provider:
     role:
       statements:
         - ${file(serverless/iam/SecretsIAM.yml):SecretsIAM}
+        - ${file(serverless/iam/SendMailIAM.yml):SendMailIAM}
         - ${file(serverless/iam/AuctionsTableIAM.yml):AuctionsTableIAM}
   environment:
     AWS_DB_REGION: ${self:provider.region}
@@ -58,6 +59,7 @@ functions:
       - http:
           method: GET
           path: /auctions
+          cors: true
   getAuction:
     handler: src/functions/auctions/getAuction.handler
     events:
@@ -65,6 +67,7 @@ functions:
           method: GET
           path: /auctions/{id}
           authorizer: authorizer
+          cors: true
   createAuction:
     handler: src/functions/auctions/createAuction.handler
     events:
@@ -72,6 +75,7 @@ functions:
           method: POST
           path: /auctions
           authorizer: authorizer
+          cors: true
   updateAuction:
     handler: src/functions/auctions/updateAuction.handler
     events:
@@ -79,6 +83,7 @@ functions:
           method: PATCH
           path: /auctions/{id}
           authorizer: authorizer
+          cors: true
   deleteAuction:
     handler: src/functions/auctions/deleteAuction.handler
     events:
@@ -86,6 +91,7 @@ functions:
           method: DELETE
           path: /auctions/{id}
           authorizer: authorizer
+          cors: true
   placeBid:
     handler: src/functions/auctions/placeBid.handler
     events:
@@ -93,6 +99,7 @@ functions:
           method: POST
           path: /auctions/{id}/bid
           authorizer: authorizer
+          cors: true
   processAuctions:
     handler: src/functions/auctions/processAuctions.handler
     events:
@@ -100,6 +107,15 @@ functions:
           method: POST
           path: /auctions/process
           authorizer: authorizer
+          cors: true
+  sendMail:
+    handler: src/functions/notification/sendMail.handler
+    events:
+      - http:
+          method: POST
+          path: /sendMail
+          authorizer: authorizer
+          cors: true
 
 resources:
   Resources:
@@ -134,7 +150,9 @@ custom:
     packager: yarn
     minify: true
     keepNames: true
-    exclude: ['aws-sdk', '@aws-sdk/client-dynamodb', '@aws-sdk/util-dynamodb', '@aws-sdk/credential-providers']
+    exclude:
+      - aws-sdk
+      - '@aws-sdk/*'
     installExtraArgs: ['--max-old-space-size=4096']
     watch:
       pattern: ['src/**/*.ts']
