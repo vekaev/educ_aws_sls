@@ -1,6 +1,8 @@
 import { SendEmailCommand, SESClient } from '@aws-sdk/client-ses';
 
-const sesClient = new SESClient({ region: process.env.AWS_DB_REGION });
+import { DEFAULT_AMAZON_CLIENT_CONFIG } from '@/constants';
+
+const sesClient = new SESClient(DEFAULT_AMAZON_CLIENT_CONFIG);
 
 interface SendEmailParams {
     to: string[];
@@ -28,6 +30,6 @@ export const ses = {
             },
         });
 
-        await sesClient.send(params);
+        return sesClient.send(params);
     },
 };

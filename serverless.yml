@@ -21,13 +21,16 @@ provider:
       statements:
         - ${file(serverless/iam/SecretsIAM.yml):SecretsIAM}
         - ${file(serverless/iam/SendMailIAM.yml):SendMailIAM}
+        - ${file(serverless/iam/MailQueueIAM.yml):MailQueueIAM}
         - ${file(serverless/iam/AuctionsTableIAM.yml):AuctionsTableIAM}
   environment:
+    ENV: ${self:provider.stage}
     AWS_DB_REGION: ${self:provider.region}
     AWS_DB_PROFILE: ${self:provider.profile}
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
     AUCTIONS_TABLE_NAME: ${self:custom.AuctionsTable.name}
     AUTH0_PUBLIC_KEY: ${ssm:${self:custom.ssmBasePath}/AUTH0_PUBLIC_KEY}
+    MAIL_QUEUE_URL: ${self:custom.MailQueue.url}
 
 package:
   individually: true
@@ -111,15 +114,14 @@ functions:
   sendMail:
     handler: src/functions/notification/sendMail.handler
     events:
-      - http:
-          method: POST
-          path: /sendMail
-          authorizer: authorizer
-          cors: true
+      - sqs:
+          arn: ${self:custom.MailQueue.arn}
+          batchSize: 1
 
 resources:
   Resources:
     AuctionsTable: ${file(serverless/resources/AuctionsTable.yml):AuctionsTable}
+    MailQueue: ${file(serverless/resources/MailQueue.yml):MailQueue}
     GatewayResponseDefault4XX:
       Type: AWS::ApiGateway::GatewayResponse
       Properties:
@@ -139,6 +141,10 @@ plugins:
 
 custom:
   ssmBasePath: /aws/reference/secretsmanager/${self:service}/${self:provider.stage}
+  MailQueue:
+    url: !Ref MailQueue
+    arn: !GetAtt MailQueue.Arn
+    name: MailQueue-${self:service}-${self:provider.stage}
   AuctionsTable:
     name: !Ref AuctionsTable
     arn:  !GetAtt AuctionsTable.Arn

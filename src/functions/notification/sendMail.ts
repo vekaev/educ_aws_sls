@@ -1,5 +1,9 @@
-import { middify } from '@/utils/middlewares';
+import { SQSEvent } from 'aws-lambda';
 
-import { NotificationService } from '@/modules/notification';
+import { NotificationService, SendEmailDto } from '@/modules/notification';
 
-export const handler = middify(NotificationService.sendEmail);
+export const handler = (event: SQSEvent) => {
+    const email = JSON.parse(event.Records[0].body) as SendEmailDto;
+
+    return NotificationService.sendEmail(email);
+};

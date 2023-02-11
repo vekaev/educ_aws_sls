@@ -3,11 +3,14 @@ import createError from 'http-errors';
 import addHours from 'date-fns/addHours';
 import { StatusCodes } from 'http-status-codes';
 
+import { sqs } from '@/libs/sqs';
+import { SendEmailDto } from '@/modules/notification';
+
+import { responseFactory } from '@/utils/common.helpers';
+
 import { GetAuctionsQueryDto } from './auctions.dto';
 import { Auction, StatusEnum } from './auctions.types';
 import { AuctionsRepository } from './auctions.repository';
-
-import { responseFactory } from '@/utils/common.helpers';
 
 export const AuctionsService = {
     getAuctions: (query: GetAuctionsQueryDto = {}) => {
@@ -22,7 +25,7 @@ export const AuctionsService = {
     createAuction: async (title: string, seller: string) => {
         const now = new Date();
         const createdAt = now.toISOString();
-        const endingAt = addHours(now, 1).toISOString();
+        const endingAt = addHours(now, 2).toISOString();
         const auction: Auction = {
             id: uuid(),
             title,
@@ -55,22 +58,42 @@ export const AuctionsService = {
         return responseFactory({}, StatusCodes.ACCEPTED);
     },
 
-    closeAuction: async (id: string) => {
-        const auction = await AuctionsService.getAuction(id);
-
+    closeAuction: async (auction: Auction) => {
         if (auction.status === StatusEnum.CLOSED)
             throw new createError.Forbidden('Auction is already closed!');
 
-        return AuctionsService.updateAuction(id, {
+        await AuctionsService.updateAuction(auction.id, {
             status: StatusEnum.CLOSED,
         });
+
+        const notifySeller = sqs
+            .sendMessage(
+                JSON.stringify({
+                    subject: 'Your item has been bid on!',
+                    recipient: auction.seller,
+                    body: `Woohoo! Your item "${auction.title}" has been bid on!`,
+                } as SendEmailDto),
+            )
+            .catch((e) => console.error(e));
+
+        const notifyBidder = sqs
+            .sendMessage(
+                JSON.stringify({
+                    subject: 'You won an auction!',
+                    recipient: auction.highestBid.bidder,
+                    body: `What a great deal! You got yourself a "${auction.title}"`,
+                } as SendEmailDto),
+            )
+            .catch((e) => console.error(e));
+
+        return Promise.all([notifySeller, notifyBidder]);
     },
 
     processAuctions: async () => {
         try {
             const auctionsToClose = await AuctionsRepository.getEndedAuctions();
-            const closePromises = auctionsToClose.map((auction) =>
-                AuctionsService.closeAuction(auction.id),
+            const closePromises = auctionsToClose.map(
+                AuctionsService.closeAuction,
             );
 
             await Promise.all(closePromises);
