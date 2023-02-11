@@ -4,7 +4,9 @@ on:
     branches:
       - master
 jobs:
+  lint: ${file(.github/workflows/lint.yml):jobs.lint}
   deploy:
+    needs: lint
     name: Deploy
     runs-on: ubuntu-latest
     steps:

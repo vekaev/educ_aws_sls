@@ -147,7 +147,7 @@ custom:
     name: !Ref AuctionsTable
     arn:  !GetAtt AuctionsTable.Arn
   AuctionsBucket:
-    name: AuctionsBucket-${self:service}-${self:provider.stage}
+    name: auctions-bucket-${self:service}-${self:provider.stage}
   serverless-offline:
     httpPort: 3001
     noPrependStageInUrl: true

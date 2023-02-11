@@ -1,7 +1,7 @@
 name: reviewdog
 on: [pull_request]
 jobs:
-  eslint:
+  lint:
     name: runner / eslint
     runs-on: ubuntu-latest
     steps:

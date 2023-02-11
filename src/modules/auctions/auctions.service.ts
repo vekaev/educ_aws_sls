@@ -30,11 +30,11 @@ export const AuctionsService = {
             id: uuid(),
             title,
             seller,
-            status: StatusEnum.OPEN,
-            highestBid: { amount: 0 },
             endingAt,
             createdAt,
             updatedAt: createdAt,
+            status: StatusEnum.OPEN,
+            highestBid: { amount: 0 },
         };
 
         await AuctionsRepository.create(auction);
@@ -46,18 +46,39 @@ export const AuctionsService = {
         id: string,
         { picture, ...updateAuctionDto }: UpdateAuctionBodyDto,
     ) => {
-        const data: Partial<Auction> = {
+        let auction: Auction | undefined;
+        const newData: Partial<Auction> = {
             ...updateAuctionDto,
             updatedAt: new Date().toISOString(),
         };
 
         if (picture) {
-            const pictureUrl = await s3.uploadImage(picture, id);
-            console.info('pictureUrl', pictureUrl);
-            // data.pictureUrl = pictureUrl;
+            auction = await AuctionsService.getAuction(id);
+            newData.pictureUrl = await s3.uploadImage(uuid(), picture);
         }
 
-        return AuctionsRepository.update(id, data);
+        try {
+            const result = await AuctionsRepository.update(id, newData);
+
+            if (picture && auction?.pictureUrl) {
+                await s3.deleteImage(auction.pictureUrl).catch((error) => {
+                    console.error('Could not delete picture', error);
+                    console.info('Old picture URL', auction?.pictureUrl);
+                });
+            }
+
+            return result;
+        } catch (error) {
+            console.info(error);
+
+            if (picture && newData.pictureUrl)
+                await s3.deleteImage(newData.pictureUrl).catch((error) => {
+                    console.error('Could not delete picture', error);
+                    console.info('New picture URL', newData.pictureUrl);
+                });
+
+            throw createError.InternalServerError('Could not update auction');
+        }
     },
 
     deleteAuction: async (id: string) => {
