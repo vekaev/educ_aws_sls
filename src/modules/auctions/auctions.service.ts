@@ -8,6 +8,8 @@ import { sqs } from '@/libs/sqs';
 
 import { responseFactory } from '@/utils/common.helpers';
 
+import { IUser } from '@/types';
+
 import { Auction, StatusEnum } from './auctions.types';
 import { AuctionsRepository } from './auctions.repository';
 import { GetAuctionsQueryDto, UpdateAuctionBodyDto } from './auctions.dto';
@@ -45,25 +47,32 @@ export const AuctionsService = {
     updateAuction: async (
         id: string,
         { picture, ...updateAuctionDto }: UpdateAuctionBodyDto,
+        user?: IUser,
     ) => {
-        let auction: Auction | undefined;
+        const auction = await AuctionsService.getAuction(id);
+
+        if (user && auction.seller !== user.email) {
+            throw new createError.Forbidden(
+                'You are not the seller of this auction',
+            );
+        }
+
         const newData: Partial<Auction> = {
             ...updateAuctionDto,
             updatedAt: new Date().toISOString(),
         };
 
         if (picture) {
-            auction = await AuctionsService.getAuction(id);
             newData.pictureUrl = await s3.uploadImage(uuid(), picture);
         }
 
         try {
             const result = await AuctionsRepository.update(id, newData);
 
-            if (picture && auction?.pictureUrl) {
+            if (picture && auction.pictureUrl) {
                 await s3.deleteImage(auction.pictureUrl).catch((error) => {
                     console.error('Could not delete picture', error);
-                    console.info('Old picture URL', auction?.pictureUrl);
+                    console.info('Old picture URL', auction.pictureUrl);
                 });
             }
 
