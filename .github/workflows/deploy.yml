@@ -15,6 +15,8 @@ jobs:
         with:
           cache: 'yarn'
           node-version-file: '.nvmrc'
+      - name: Install serverless
+        run: yarn global add serverless
       - name: Install dependencies
         run: yarn install --frozen-lockfile --ignore-scripts
       - name: Serverless AWS authentication
