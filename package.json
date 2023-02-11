@@ -12,7 +12,9 @@
         "start:debug": "export SLS_DEBUG=* && nodemon -e js,ts,yml -x yarn run start",
         "analyze:getAuctions": "sls package --analyze getAuctions --aws-profile vekaevdev",
         "logs:getAuctions": "sls logs -f getAuctions -t --aws-profile vekaevdev",
-        "invoke:getAuctions": "sls invoke -f getAuctions -l --aws-profile vekaevdev"
+        "invoke:getAuctions": "sls invoke -f getAuctions -l --aws-profile vekaevdev",
+        "prepare": "npx husky install",
+        "preinstall": "npx only-allow yarn"
     },
     "dependencies": {
         "@aws-sdk/client-dynamodb": "3.267.0",
