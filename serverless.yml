@@ -23,14 +23,16 @@ provider:
         - ${file(serverless/iam/SendMailIAM.yml):SendMailIAM}
         - ${file(serverless/iam/MailQueueIAM.yml):MailQueueIAM}
         - ${file(serverless/iam/AuctionsTableIAM.yml):AuctionsTableIAM}
+        - ${file(serverless/iam/AuctionsBucketIAM.yml):AuctionsBucketIAM}
   environment:
     ENV: ${self:provider.stage}
     AWS_DB_REGION: ${self:provider.region}
     AWS_DB_PROFILE: ${self:provider.profile}
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
-    AUCTIONS_TABLE_NAME: ${self:custom.AuctionsTable.name}
-    AUTH0_PUBLIC_KEY: ${ssm:${self:custom.ssmBasePath}/AUTH0_PUBLIC_KEY}
     MAIL_QUEUE_URL: ${self:custom.MailQueue.url}
+    AUCTIONS_TABLE_NAME: ${self:custom.AuctionsTable.name}
+    AUCTIONS_BUCKET_NAME: ${self:custom.AuctionsBucket.name}
+    AUTH0_PUBLIC_KEY: ${ssm:${self:custom.ssmBasePath}/AUTH0_PUBLIC_KEY}
 
 package:
   individually: true
@@ -111,6 +113,7 @@ functions:
           path: /auctions/process
           authorizer: authorizer
           cors: true
+      - schedule: rate(30 minutes)
   sendMail:
     handler: src/functions/notification/sendMail.handler
     events:
@@ -120,16 +123,11 @@ functions:
 
 resources:
   Resources:
-    AuctionsTable: ${file(serverless/resources/AuctionsTable.yml):AuctionsTable}
     MailQueue: ${file(serverless/resources/MailQueue.yml):MailQueue}
-    GatewayResponseDefault4XX:
-      Type: AWS::ApiGateway::GatewayResponse
-      Properties:
-        ResponseParameters:
-          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
-        ResponseType: DEFAULT_4XX
-        RestApiId:
-          Ref: ApiGatewayRestApi
+    AuctionsTable: ${file(serverless/resources/AuctionsTable.yml):AuctionsTable}
+    AuctionsBucket: ${file(serverless/resources/AuctionsBucket.yml):AuctionsBucket}
+    AuctionsBucketPolicy: ${file(serverless/resources/AuctionsBucket.yml):AuctionsBucketPolicy}
+    GatewayResponseDefault4XX: ${file(serverless/resources/GatewayResponse.yml):GatewayResponseDefault4XX}
 
 plugins:
 #   - serverless-auto-swagger
@@ -148,7 +146,8 @@ custom:
   AuctionsTable:
     name: !Ref AuctionsTable
     arn:  !GetAtt AuctionsTable.Arn
-  # PLUGINS CONFIGS
+  AuctionsBucket:
+    name: AuctionsBucket-${self:service}-${self:provider.stage}
   serverless-offline:
     httpPort: 3001
     noPrependStageInUrl: true
@@ -157,7 +156,7 @@ custom:
     minify: true
     keepNames: true
     exclude:
-      - aws-sdk
+      - 'aws-sdk'
       - '@aws-sdk/*'
     installExtraArgs: ['--max-old-space-size=4096']
     watch:

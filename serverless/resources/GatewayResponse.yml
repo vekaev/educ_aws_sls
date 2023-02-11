@@ -1,0 +1,8 @@
+GatewayResponseDefault4XX:
+  Type: AWS::ApiGateway::GatewayResponse
+  Properties:
+    ResponseParameters:
+      gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+    ResponseType: DEFAULT_4XX
+    RestApiId:
+      Ref: ApiGatewayRestApi

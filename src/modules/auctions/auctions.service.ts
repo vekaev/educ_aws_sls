@@ -3,14 +3,14 @@ import createError from 'http-errors';
 import addHours from 'date-fns/addHours';
 import { StatusCodes } from 'http-status-codes';
 
+import { s3 } from '@/libs/s3';
 import { sqs } from '@/libs/sqs';
-import { SendEmailDto } from '@/modules/notification';
 
 import { responseFactory } from '@/utils/common.helpers';
 
-import { GetAuctionsQueryDto } from './auctions.dto';
 import { Auction, StatusEnum } from './auctions.types';
 import { AuctionsRepository } from './auctions.repository';
+import { GetAuctionsQueryDto, UpdateAuctionBodyDto } from './auctions.dto';
 
 export const AuctionsService = {
     getAuctions: (query: GetAuctionsQueryDto = {}) => {
@@ -42,13 +42,22 @@ export const AuctionsService = {
         return responseFactory(auction, StatusCodes.CREATED);
     },
 
-    updateAuction: async (id: string, updateAuctionDto: Partial<Auction>) => {
-        const updatedAt = new Date().toISOString();
-
-        return AuctionsRepository.update(id, {
-            updatedAt,
+    updateAuction: async (
+        id: string,
+        { picture, ...updateAuctionDto }: UpdateAuctionBodyDto,
+    ) => {
+        const data: Partial<Auction> = {
             ...updateAuctionDto,
-        });
+            updatedAt: new Date().toISOString(),
+        };
+
+        if (picture) {
+            const pictureUrl = await s3.uploadImage(picture, id);
+            console.info('pictureUrl', pictureUrl);
+            // data.pictureUrl = pictureUrl;
+        }
+
+        return AuctionsRepository.update(id, data);
     },
 
     deleteAuction: async (id: string) => {
@@ -66,42 +75,42 @@ export const AuctionsService = {
             status: StatusEnum.CLOSED,
         });
 
-        const notifySeller = sqs
-            .sendMessage(
-                JSON.stringify({
-                    subject: 'Your item has been bid on!',
+        if (auction.highestBid.amount === 0 || !auction.highestBid.bidder) {
+            return sqs
+                .sendSesMessage({
+                    subject: 'Your item has not been sold',
                     recipient: auction.seller,
-                    body: `Woohoo! Your item "${auction.title}" has been bid on!`,
-                } as SendEmailDto),
-            )
-            .catch((e) => console.error(e));
+                    body: `Oh no! Your item "${auction.title}" did not get any bids.`,
+                })
+                .catch(console.error);
+        }
+
+        const notifySeller = sqs
+            .sendSesMessage({
+                subject: 'Your item has been bid on!',
+                recipient: auction.seller,
+                body: `Woohoo! Your item "${auction.title}" has been bid on!`,
+            })
+            .catch(console.error);
 
         const notifyBidder = sqs
-            .sendMessage(
-                JSON.stringify({
-                    subject: 'You won an auction!',
-                    recipient: auction.highestBid.bidder,
-                    body: `What a great deal! You got yourself a "${auction.title}"`,
-                } as SendEmailDto),
-            )
-            .catch((e) => console.error(e));
+            .sendSesMessage({
+                subject: 'You won an auction!',
+                recipient: auction.highestBid.bidder,
+                body: `What a great deal! You got yourself a "${auction.title}"`,
+            })
+            .catch(console.error);
 
         return Promise.all([notifySeller, notifyBidder]);
     },
 
     processAuctions: async () => {
-        try {
-            const auctionsToClose = await AuctionsRepository.getEndedAuctions();
-            const closePromises = auctionsToClose.map(
-                AuctionsService.closeAuction,
-            );
+        const auctionsToClose = await AuctionsRepository.getEndedAuctions();
+        const closePromises = auctionsToClose.map(AuctionsService.closeAuction);
 
-            await Promise.all(closePromises);
+        await Promise.all(closePromises);
 
-            return { closed: closePromises.length };
-        } catch (e) {
-            throw new createError.InternalServerError((e as Error).message);
-        }
+        return { closed: closePromises.length };
     },
 
     placeBid: async (id: string, bidAmount: number, bidder: string) => {

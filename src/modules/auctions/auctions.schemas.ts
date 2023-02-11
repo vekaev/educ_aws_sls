@@ -36,6 +36,10 @@ export const updateAuctionSchema = {
             type: 'object',
             properties: {
                 title: { type: 'string' },
+                picture: {
+                    type: 'string',
+                    pattern: '^data:image/\\w+;base64,',
+                },
                 status: {
                     type: 'number',
                     enum: Object.values(StatusEnum),

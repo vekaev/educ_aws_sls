@@ -10,6 +10,7 @@ export interface Auction {
     seller: string;
     title: string;
     status: StatusEnum;
+    pictureUrl?: string;
     createdAt: string;
     updatedAt: string;
     endingAt: string;
