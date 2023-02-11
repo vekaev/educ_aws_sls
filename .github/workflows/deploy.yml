@@ -20,6 +20,6 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile --ignore-scripts
       - name: Serverless AWS authentication
-        run: sls config credentials -p aws --key ${{ secrets.AWS_ACCESS_KEY_ID }} --secret ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: sls config credentials -p aws --key ${{ secrets.AWS_ACCESS_KEY_ID }} --secret ${{ secrets.AWS_SECRET_ACCESS_KEY }} -n default
       - name: Deploy
-        run: sls deploy --profile default
+        run: sls deploy
