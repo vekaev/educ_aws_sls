@@ -1,6 +1,7 @@
 import { SQSClient, SendMessageCommand } from '@aws-sdk/client-sqs';
 
-import { SendEmailDto } from '@/modules/notification';
+import { SendSimpleEmailDto } from '@/modules/notification';
+
 import { DEFAULT_AMAZON_CLIENT_CONFIG } from '@/constants';
 
 const sqsClient = new SQSClient(DEFAULT_AMAZON_CLIENT_CONFIG);
@@ -15,6 +16,6 @@ export const sqs = {
         return sqsClient.send(new SendMessageCommand(params));
     },
 
-    sendSesMessage: (message: SendEmailDto) =>
+    sendSesMessage: (message: SendSimpleEmailDto) =>
         sqs.sendMessage(JSON.stringify(message), process.env.MAIL_QUEUE_URL!),
 };

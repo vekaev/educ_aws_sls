@@ -33,6 +33,7 @@ provider:
     AUCTIONS_TABLE_NAME: ${self:custom.AuctionsTable.name}
     AUCTIONS_BUCKET_NAME: ${self:custom.AuctionsBucket.name}
     AUTH0_PUBLIC_KEY: ${ssm:${self:custom.ssmBasePath}/AUTH0_PUBLIC_KEY}
+    SES_FROM_EMAIL: ${ssm:${self:custom.ssmBasePath}/SES_FROM_EMAIL, 'vekaevdev@gmail.com'}
 
 package:
   individually: true
@@ -130,7 +131,7 @@ resources:
     GatewayResponseDefault4XX: ${file(serverless/resources/GatewayResponse.yml):GatewayResponseDefault4XX}
 
 plugins:
-#   - serverless-auto-swagger
+  - serverless-auto-swagger
   - serverless-analyze-bundle-plugin
   - serverless-esbuild
   - serverless-offline
@@ -142,7 +143,7 @@ custom:
   MailQueue:
     url: !Ref MailQueue
     arn: !GetAtt MailQueue.Arn
-    name: MailQueue-${self:service}-${self:provider.stage}
+    name: mail-queue-${self:service}-${self:provider.stage}
   AuctionsTable:
     name: !Ref AuctionsTable
     arn:  !GetAtt AuctionsTable.Arn

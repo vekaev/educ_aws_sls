@@ -1,19 +1,25 @@
 import createError from 'http-errors';
 
 import { ses } from '@/libs/ses';
-import { getErrorMessage } from '@/utils/error.utils';
 
-import { SendEmailDto } from './notification.dto';
+import { getErrorMessage } from '@/utils/error.utils';
 import { responseFactory } from '@/utils/common.helpers';
 
+import { SendSimpleEmailDto } from './notification.dto';
+
 export const NotificationService = {
-    sendEmail: async ({ subject, body, recipient }: SendEmailDto) => {
+    sendSimpleEmail: async ({
+        subject,
+        body,
+        recipient,
+        from = process.env.SES_FROM_EMAIL!,
+    }: SendSimpleEmailDto) => {
         try {
-            const result = await ses.sendEmail({
+            const result = await ses.sendSimpleEmail({
                 subject,
                 text: body,
                 to: [recipient],
-                from: 'vekaevdev@gmail.com',
+                from,
             });
 
             return responseFactory(result);

@@ -4,6 +4,7 @@ import {
 } from 'aws-lambda';
 
 import { AuthService } from '@/modules/auth';
+
 import { generatePolicy, getTokenFrom } from '@/utils/common.helpers';
 
 import { PolicyEffect } from '@/types';

@@ -3,6 +3,7 @@ import {
     AuctionsService,
     PlaceBidBodyDto,
 } from '@/modules/auctions';
+
 import { getUserFrom } from '@/utils/auth.utils';
 import { middify, verifyParamIdMiddleware } from '@/utils/middlewares';
 import { validatorMiddleware } from '@/utils/middlewares/validator.middleware';

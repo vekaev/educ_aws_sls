@@ -1,7 +1,7 @@
 import {
     AuctionsService,
-    CreateAuctionBodyDto,
     createAuctionSchema,
+    CreateAuctionBodyDto,
 } from '@/modules/auctions';
 
 import { middify } from '@/utils/middlewares';

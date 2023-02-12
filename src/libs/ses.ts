@@ -4,7 +4,7 @@ import { DEFAULT_AMAZON_CLIENT_CONFIG } from '@/constants';
 
 const sesClient = new SESClient(DEFAULT_AMAZON_CLIENT_CONFIG);
 
-interface SendEmailParams {
+interface SendSimpleEmailParams {
     to: string[];
     from: string;
     subject: string;
@@ -12,7 +12,7 @@ interface SendEmailParams {
 }
 
 export const ses = {
-    sendEmail: async ({ to, from, subject, text }: SendEmailParams) => {
+    sendSimpleEmail: ({ to, from, subject, text }: SendSimpleEmailParams) => {
         const params = new SendEmailCommand({
             Message: {
                 Body: {

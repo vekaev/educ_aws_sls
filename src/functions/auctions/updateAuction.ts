@@ -1,7 +1,7 @@
 import {
     AuctionsService,
-    UpdateAuctionBodyDto,
     updateAuctionSchema,
+    UpdateAuctionBodyDto,
 } from '@/modules/auctions';
 import isEmpty from 'lodash/isEmpty';
 import createError from 'http-errors';
