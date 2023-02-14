@@ -114,7 +114,7 @@ functions:
           path: /auctions/process
           authorizer: authorizer
           cors: true
-      - schedule: rate(30 minutes)
+#       - schedule: rate(30 minutes)
   sendMail:
     handler: src/functions/notification/sendMail.handler
     events:
