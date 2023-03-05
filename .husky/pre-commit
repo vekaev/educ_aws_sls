@@ -2,9 +2,3 @@
 . "$(dirname -- "$0")/_/husky.sh"
 
 yarn lint-staged
-
-# Clean swagger build
-#echo "Cleaning swagger build"
-#cat > src/modules/swagger/static/swagger.json << EOF
-#{}
-#EOF
