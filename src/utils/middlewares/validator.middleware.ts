@@ -1,13 +1,11 @@
 import validator from '@middy/validator';
 import { transpileSchema } from '@middy/validator/transpile';
 
-import { ValidatorOptions } from '@/types';
-
 export const validatorMiddleware = (
     eventSchema: object,
-    options: ValidatorOptions = {},
+    options: Parameters<typeof validator>[0] = {},
 ) =>
     validator({
-        eventSchema: transpileSchema(eventSchema) as typeof Function,
+        eventSchema: transpileSchema(eventSchema),
         ...options,
     });

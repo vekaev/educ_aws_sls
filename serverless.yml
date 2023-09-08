@@ -135,6 +135,7 @@ plugins:
   - serverless-analyze-bundle-plugin
   - serverless-esbuild
   - serverless-offline
+  - serverless-domain-manager
   - serverless-cloudside-plugin
   - serverless-prune-plugin
 
@@ -167,3 +168,15 @@ custom:
     number: 1
   autoswagger:
     typefiles: []
+  customDomain:
+    domainName: ${self:service}-${self:provider.stage}.vekaev
+    basePath: ''
+    stage: ${self:provider.stage}
+    createRoute53Record: true
+    endpointType: 'regional'
+    certificateName: '*.vekaev'
+    certificateArn: ${ssm:${self:custom.ssmBasePath}/CERTIFICATE_ARN}
+    hostedZoneId: ${ssm:${self:custom.ssmBasePath}/HOSTED_ZONE_ID}
+    securityPolicy: tls_1_2
+    enabled: true
+    autoDomain: true
